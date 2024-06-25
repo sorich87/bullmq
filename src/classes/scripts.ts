@@ -262,7 +262,7 @@ export class Scripts {
     customKey: string,
     nextMillis: number,
     opts: RepeatableOptions,
-    oldCustomKey: string,
+    legacyCustomKey: string,
     skipCheckExists: boolean,
   ): (string | number | Buffer)[] {
     const keys: (string | number | Buffer)[] = [
@@ -273,7 +273,7 @@ export class Scripts {
     const args = [
       nextMillis,
       pack(opts),
-      oldCustomKey,
+      legacyCustomKey,
       skipCheckExists ? '1' : '0',
     ];
 
@@ -284,7 +284,7 @@ export class Scripts {
     customKey: string,
     nextMillis: number,
     opts: RepeatableOptions,
-    oldCustomKey: string,
+    legacyCustomKey: string,
     skipCheckExists: boolean,
   ): Promise<string> {
     const client = await this.queue.client;
@@ -293,7 +293,7 @@ export class Scripts {
       customKey,
       nextMillis,
       opts,
-      oldCustomKey,
+      legacyCustomKey,
       skipCheckExists,
     );
 
@@ -301,28 +301,33 @@ export class Scripts {
   }
 
   private removeRepeatableArgs(
-    oldRepeatJobId: string,
-    optionsConcat: string,
+    legacyRepeatJobId: string,
+    qualifiedName: string,
     repeatJobKey: string,
   ): string[] {
     const queueKeys = this.queue.keys;
 
     const keys = [queueKeys.repeat, queueKeys.delayed];
 
-    const args = [oldRepeatJobId, optionsConcat, repeatJobKey, queueKeys['']];
+    const args = [
+      legacyRepeatJobId,
+      qualifiedName,
+      repeatJobKey,
+      queueKeys[''],
+    ];
 
     return keys.concat(args);
   }
 
   async removeRepeatable(
-    oldRepeatJobId: string,
-    optionsConcat: string,
+    legacyRepeatJobId: string,
+    qualifiedName: string,
     repeatJobKey: string,
   ): Promise<number> {
     const client = await this.queue.client;
     const args = this.removeRepeatableArgs(
-      oldRepeatJobId,
-      optionsConcat,
+      legacyRepeatJobId,
+      qualifiedName,
       repeatJobKey,
     );
 
